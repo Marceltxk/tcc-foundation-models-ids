@@ -216,3 +216,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Módulo 2: dados e saídas geradas
+dados/
+modulo2/dados/
+modulo2/captura_nfstream_*.csv
+modulo2/nfstream_cicids2017_rotulado.csv
+modulo2/comparacao_semana_*.csv
+modulo2/diagnostico_janelas.csv
+modulo2/comparacao_semana.png
+modulo2/EDA_aula2_referencia.ipynb

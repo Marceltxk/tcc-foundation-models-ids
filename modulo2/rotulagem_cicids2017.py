@@ -23,7 +23,7 @@ como candidatos a atacante em cada ataque originado externamente (tudo, exceto
 a segunda fase da Infiltration, que ja e um scan interno feito pela propria
 maquina vitima).
 
-Aviso metodologico:
+Aviso metodologico (documentar no relatorio):
 Engelen, Rimmer & Joosen (2021), em "Troubleshooting an Intrusion Detection
 Dataset: the CICIDS2017 Case Study", relatam que essas janelas oficiais nao
 sao perfeitamente precisas e que os proprios autores do CICFlowMeter tiveram
