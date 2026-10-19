@@ -226,3 +226,6 @@ modulo2/comparacao_semana_*.csv
 modulo2/diagnostico_janelas.csv
 modulo2/comparacao_semana.png
 modulo2/EDA_aula2_referencia.ipynb
+modulo2/captura_nfstream_*.csv
+modulo2/nfstream_cicids2017_rotulado.csv
+.ipynb_checkpoints/

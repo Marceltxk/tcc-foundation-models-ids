@@ -1,0 +1,150 @@
+% secao_resultados.tex -- use com \input{secao_resultados} no Overleaf.
+% Requer: \usepackage{booktabs}
+% Todos os numeros abaixo sao do conjunto de TESTE e vieram de modulo3/resultados_*/.
+% Seed unica (42), um unico split, limiar 0,5 para F1/precisao/recall.
+
+\section{Resultados}
+
+\subsection{Configuração experimental}
+
+Os fluxos foram extraídos dos PCAPs de terça a sexta-feira da CICIDS2017 com o NFStream e rotulados por IP e horário (Seção~\ref{sec:dataset}). Foram usadas 14 variáveis numéricas por fluxo (12 do NFStream mais duas derivadas); IPs, \textit{timestamps}, MACs e identificadores ficaram de fora porque o rótulo foi construído a partir deles. Dos benignos (1.171.671), sortearam-se 300 mil para treino, 100 mil para validação e 100 mil para teste, sem sobreposição. Os ataques com mais de 500 observações (12 classes) foram divididos de forma estratificada em 70\%/20\%/10\%. Sql Injection (9 fluxos) e Heartbleed (1 fluxo) foram descartados. Os modelos foram treinados apenas no conjunto de treino; validação e teste só serviram para calcular métricas.
+
+Foram comparados cinco algoritmos: Regressão Logística, Árvore de Decisão, Random Forest, LightGBM e MLP. As métricas são AUC (ROC), AUC-PR, F1, precisão e revocação; no caso multiclasse, usa-se a média macro entre classes. Como a classe Infiltration tem 55.134 fluxos na rotulagem aqui adotada contra 36 no CSV oficial, todos os experimentos foram executados duas vezes: com e sem essa classe.
+
+\subsection{Tarefa 1: classificação binária (benigno $\times$ ataque)}
+
+\begin{table}[ht]
+\centering
+\caption{Classificação binária, conjunto de teste, \textbf{com} Infiltration.}
+\begin{tabular}{lccccc}
+\toprule
+Modelo & AUC & AUC-PR & F1 & Precisão & Revocação \\
+\midrule
+Regressão Logística & 0,9823 & 0,9355 & 0,8782 & 0,8102 & 0,9588 \\
+Árvore de Decisão   & 0,9978 & 0,9904 & 0,9764 & 0,9550 & 0,9988 \\
+Random Forest       & 0,9974 & 0,9849 & 0,9838 & 0,9690 & 0,9989 \\
+LightGBM            & 0,9990 & 0,9962 & 0,9812 & 0,9641 & 0,9989 \\
+MLP                 & 0,9987 & 0,9948 & 0,9792 & 0,9656 & 0,9933 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Classificação binária, conjunto de teste, \textbf{sem} Infiltration.}
+\begin{tabular}{lccccc}
+\toprule
+Modelo & AUC & AUC-PR & F1 & Precisão & Revocação \\
+\midrule
+Regressão Logística & 0,9886 & 0,9355 & 0,8862 & 0,8221 & 0,9612 \\
+Árvore de Decisão   & 0,9986 & 0,9934 & 0,9867 & 0,9751 & 0,9986 \\
+Random Forest       & 0,9993 & 0,9948 & 0,9960 & 0,9931 & 0,9990 \\
+LightGBM            & 0,9997 & 0,9987 & 0,9933 & 0,9882 & 0,9985 \\
+MLP                 & 0,9996 & 0,9981 & 0,9913 & 0,9903 & 0,9924 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Os quatro modelos não lineares ficam muito próximos (AUC-PR entre 0,985 e 0,999), e a Regressão Logística é claramente inferior (0,936). O LightGBM tem o maior AUC-PR nas duas execuções, e o Random Forest o maior F1. Como há uma única semente e um único \textit{split}, as diferenças entre os quatro primeiros não permitem apontar um vencedor. Retirar a Infiltration melhorou quase todas as métricas, principalmente a precisão (por exemplo, Random Forest de 0,969 para 0,993), o que sugere que parte dos falsos positivos vinha dessa classe.
+
+\subsection{Tarefa 2: classificação multiclasse}
+
+\begin{table}[ht]
+\centering
+\caption{Classificação multiclasse (média macro), conjunto de teste, \textbf{com} Infiltration.}
+\begin{tabular}{lccccc}
+\toprule
+Modelo & AUC & AUC-PR & F1 & Precisão & Revocação \\
+\midrule
+Regressão Logística & 0,9940 & 0,6376 & 0,6089 & 0,5293 & 0,9032 \\
+Árvore de Decisão   & 0,9868 & 0,8766 & 0,8929 & 0,8858 & 0,9404 \\
+Random Forest       & 0,9791 & 0,8911 & 0,9110 & 0,8935 & 0,9332 \\
+LightGBM            & 0,9995 & 0,8791 & 0,8868 & 0,8618 & 0,9433 \\
+MLP                 & 0,9992 & 0,8653 & 0,8429 & 0,9591 & 0,8499 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Classificação multiclasse (média macro), conjunto de teste, \textbf{sem} Infiltration. $\dagger$: falha de treinamento do LightGBM nesta execução; resultado descartado.}
+\begin{tabular}{lccccc}
+\toprule
+Modelo & AUC & AUC-PR & F1 & Precisão & Revocação \\
+\midrule
+Regressão Logística & 0,9941 & 0,5920 & 0,5705 & 0,4884 & 0,8996 \\
+Árvore de Decisão   & 0,9841 & 0,8682 & 0,8866 & 0,8711 & 0,9357 \\
+Random Forest       & 0,9745 & 0,8902 & 0,9092 & 0,8920 & 0,9304 \\
+LightGBM$^\dagger$  & 0,5683 & 0,1533 & 0,1623 & 0,2273 & 0,1844 \\
+MLP                 & 0,9995 & 0,8587 & 0,8313 & 0,9633 & 0,8371 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+A tarefa multiclasse é mais difícil: o melhor AUC-PR macro é 0,891 (Random Forest), contra 0,996 no caso binário. O Random Forest teve o melhor AUC-PR e o melhor F1 nas duas execuções. A AUC macro é enganosa aqui: a Regressão Logística tem AUC 0,994 com F1 de apenas 0,609, porque a AUC é inflada pelo enorme número de negativos em classes raras. Por isso a comparação se apoia em AUC-PR e F1.
+
+A Tabela~\ref{tab:porclasse} mostra de onde vem a queda. Com o Random Forest, a maioria das classes tem AUC-PR acima de 0,89, e a perda se concentra em \textit{Web Attack -- Brute Force} (0,578) e \textit{Web Attack -- XSS} (0,258). Essas duas classes têm poucos exemplos (135 e 66 no teste) e provavelmente se confundem entre si, já que ambas são tráfego HTTP contra o mesmo servidor; esta última hipótese ainda não foi verificada com matriz de confusão. O desempenho de treino nessas classes é muito maior (AUC-PR de 0,973 e 0,969), o que indica sobreajuste. O MLP quase não prevê essas classes (revocação de 0,074 e 0,045 no teste, com precisão acima de 0,90), e é isso que produz sua precisão macro alta (0,959) com revocação baixa. Vale registrar que, diferentemente dos demais, o MLP não usou ponderação de classes.
+
+\subsection{Tarefa 3: um classificador binário por ataque}
+
+Foi usado o Random Forest, melhor modelo pela média do AUC-PR entre as tarefas 1 e 2 (0,9380 contra 0,9377 do LightGBM, um empate prático). Para cada ataque, treinou-se um modelo com os benignos e apenas aquele ataque.
+
+\begin{table}[ht]
+\centering
+\caption{Random Forest, um ataque contra benignos, conjunto de teste, \textbf{com} Infiltration.}
+\begin{tabular}{lrccccc}
+\toprule
+Ataque & $n$ & AUC & AUC-PR & F1 & Precisão & Revocação \\
+\midrule
+PortScan                 & 16014 & 0,9995 & 0,9941 & 0,9973 & 0,9947 & 0,9999 \\
+DDoS                     &  6298 & 0,9999 & 0,9975 & 0,9967 & 0,9934 & 1,0000 \\
+Infiltration             &  5513 & 0,9965 & 0,8911 & 0,9280 & 0,8665 & 0,9987 \\
+DoS Hulk                 &  1429 & 1,0000 & 1,0000 & 0,9993 & 1,0000 & 0,9986 \\
+DoS GoldenEye            &   766 & 1,0000 & 0,9986 & 0,9967 & 0,9948 & 0,9987 \\
+DoS slowloris            &   448 & 1,0000 & 0,9973 & 0,9933 & 0,9889 & 0,9978 \\
+DoS Slowhttptest         &   437 & 1,0000 & 0,9905 & 0,9954 & 0,9909 & 1,0000 \\
+FTP-Patator              &   395 & 1,0000 & 0,9949 & 0,9962 & 0,9925 & 1,0000 \\
+SSH-Patator              &   246 & 0,9998 & 0,8851 & 0,9245 & 0,8627 & 0,9959 \\
+Web Attack -- Brute Force &   135 & 0,9888 & 0,9583 & 0,9314 & 0,9085 & 0,9556 \\
+Bot                      &    73 & 1,0000 & 1,0000 & 1,0000 & 1,0000 & 1,0000 \\
+Web Attack -- XSS        &    66 & 0,9922 & 0,9074 & 0,8657 & 0,8529 & 0,8788 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Os resultados sem Infiltration são praticamente os mesmos nas demais classes (por exemplo, SSH-Patator com AUC-PR 0,8935 contra 0,8851). As classes mais difíceis são Infiltration, SSH-Patator e as duas Web Attack, todas com a precisão mais baixa e a revocação alta. Bot tem desempenho perfeito, mas com apenas 73 exemplos no teste, o que limita a confiança nesse número.
+
+\begin{table}[ht]
+\centering
+\caption{AUC-PR por classe no conjunto de teste, com Infiltration: Random Forest multiclasse contra Random Forest binário por ataque.}
+\label{tab:porclasse}
+\begin{tabular}{lcc}
+\toprule
+Classe & Multiclasse & Por ataque \\
+\midrule
+PortScan                 & 0,9941 & 0,9941 \\
+DDoS                     & 0,9972 & 0,9975 \\
+Infiltration             & 0,8902 & 0,8911 \\
+DoS Hulk                 & 0,9993 & 1,0000 \\
+DoS GoldenEye            & 0,9972 & 0,9986 \\
+DoS slowloris            & 0,9986 & 0,9973 \\
+DoS Slowhttptest         & 0,9915 & 0,9905 \\
+FTP-Patator              & 0,9949 & 0,9949 \\
+SSH-Patator              & 0,8869 & 0,8851 \\
+Web Attack -- Brute Force & 0,5784 & 0,9583 \\
+Bot                      & 0,9993 & 1,0000 \\
+Web Attack -- XSS        & 0,2581 & 0,9074 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Discussão}
+
+\paragraph{Qual tipo de modelo é melhor?}
+Depende da pergunta que se quer responder, e as três abordagens não são diretamente comparáveis, pois cada uma é avaliada em um conjunto de classes diferente. Para detectar se há ataque, o modelo binário é o mais simples e atinge AUC-PR de até 0,999. Para identificar \emph{qual} ataque, o multiclasse entrega o diagnóstico completo com um único modelo, e perde desempenho apenas nas classes mais raras e parecidas entre si. A Tabela~\ref{tab:porclasse} mostra que, para 10 das 12 classes, o modelo multiclasse e os modelos por ataque têm AUC-PR praticamente idênticos. Os modelos por ataque só ganham nas duas Web Attack (0,958 contra 0,578 e 0,907 contra 0,258), ao custo de 12 modelos e de saber de antemão qual aplicar.
+
+\paragraph{Qual a melhor técnica?}
+Os métodos baseados em árvores foram os mais consistentes: Random Forest e LightGBM ficaram no topo em todas as tarefas, com Random Forest à frente no multiclasse e LightGBM à frente no binário, e a diferença média entre eles é desprezível. A Árvore de Decisão chega perto com tempo de treino muito menor (4 a 5 s contra 31 a 38 s do Random Forest no caso binário). O MLP é competitivo no binário, mas tem dificuldade com classes raras. A Regressão Logística é a pior em todos os cenários, o que indica que a fronteira entre as classes não é linear nessas variáveis.
+
+\paragraph{Limitações.}
+(i) Foi usada uma única semente e um único \textit{split}, sem intervalos de confiança; as diferenças pequenas entre modelos não são conclusivas. (ii) O LightGBM multiclasse falhou na execução sem Infiltration e esse resultado foi descartado. (iii) O MLP não usou ponderação de classes, ao contrário dos demais. (iv) O rótulo vem de IP e horário (Seção~\ref{sec:dataset}); a classe Infiltration é muito maior do que no CSV oficial e parece se confundir com tráfego benigno. (v) As classes Bot e Web Attack têm poucos exemplos no teste (73, 135 e 66), então suas métricas variam bastante. (vi) Métricas calculadas com limiar 0,5, sem ajuste na validação.
